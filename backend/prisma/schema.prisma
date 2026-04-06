@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  phone           String?   @unique
+  passwordHash    String
+  nickname        String
+  avatar          String?
+  modelPreference String    @default("balanced")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  resumes         Resume[]
+  sessions        Session[]
+  jdAnalyses      JdAnalysis[]
+  matchAnalyses   MatchAnalysis[]
+  aiInteractions  AiInteraction[]
+  logs            Log[]
+
+  @@map("users")
+}
+
+// 会话表
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// 简历表
+model Resume {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  content     Json     // ResumeContent JSON
+  fileUrl     String?
+  fileType    String?
+  isDefault   Boolean  @default(false)
+  version     Int      @default(1)
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions       ResumeVersion[]
+  matchAnalyses  MatchAnalysis[]
+
+  @@index([userId])
+  @@index([tags])
+  @@map("resumes")
+}
+
+// 简历版本表
+model ResumeVersion {
+  id        String   @id @default(uuid())
+  resumeId  String
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  version   Int
+  content   Json
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([resumeId, version])
+  @@map("resume_versions")
+}
+
+// JD分析表
+model JdAnalysis {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jdText    String   @db.Text
+  structured Json    // 结构化分析结果
+  keywords  String[]
+  createdAt DateTime @default(now())
+
+  matchAnalyses MatchAnalysis[]
+
+  @@index([userId])
+  @@map("jd_analyses")
+}
+
+// 匹配分析表
+model MatchAnalysis {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId     String
+  resume       Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jdText       String   @db.Text
+  jdAnalysisId String?
+  jdAnalysis   JdAnalysis? @relation(fields: [jdAnalysisId], references: [id], onDelete: SetNull)
+  score        Float
+  breakdown    Json
+  suggestions  String[]
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([resumeId])
+  @@map("match_analyses")
+}
+
+// AI交互记录表
+model AiInteraction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // 'jd_analysis', 'resume_optimization', 'greeting_generation'
+  input     Json
+  output    Json
+  tokens    Int?
+  cost      Float?
+  model     String?
+  duration  Int?     // 毫秒
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("ai_interactions")
+}
+
+// 操作日志表
+model Log {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("logs")
+}

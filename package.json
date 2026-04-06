@@ -1,0 +1,24 @@
+{
+  "name": "jianliclaw",
+  "version": "1.0.0",
+  "description": "简历智伴 - AI简历优化助手",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "ai-service"
+  ],
+  "scripts": {
+    "backend": "npm run start -w backend",
+    "backend:dev": "npm run start:dev -w backend",
+    "frontend": "npm run dev -w frontend",
+    "ai-service": "npm run dev -w ai-service",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "db:migrate": "npm run prisma:migrate -w backend",
+    "db:generate": "npm run prisma:generate -w backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
