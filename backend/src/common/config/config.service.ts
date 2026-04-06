@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { ConfigService as NestjsConfigService } from '@nestjs/config';
 
 export interface JwtConfig {
   secret: string;
@@ -74,7 +75,7 @@ export class ConfigService {
       port: this.configService.get<number>('MINIO_PORT', 9000),
       user: this.configService.get<string>('MINIO_USER', 'minioadmin'),
       password: this.configService.get<string>('MINIO_PASSWORD', 'minioadmin123'),
-      useSSL: this.configService.get<boolean>('MINIO_USE_SSL', false),
+      useSSL: this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true',
       bucket: this.configService.get<string>('MINIO_BUCKET', 'resumes'),
     };
   }
@@ -95,6 +96,3 @@ export class ConfigService {
     return this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:8000');
   }
 }
-
-// 导入ConfigService类型别名
-import { ConfigService as NestjsConfigService } from '@nestjs/config';

@@ -282,7 +282,7 @@ export class ResumeService {
     const resume = await this.prisma.resume.update({
       where: { id },
       data: {
-        content: targetVersion.content,
+        content: targetVersion.content as any,
         version: { increment: 1 },
       },
     });
@@ -292,7 +292,7 @@ export class ResumeService {
       data: {
         resumeId: id,
         version: resume.version,
-        content: targetVersion.content,
+        content: targetVersion.content as any,
         note: `恢复到版本 ${version}`,
       },
     });

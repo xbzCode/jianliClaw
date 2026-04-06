@@ -25,6 +25,6 @@ export interface LoginDto {
 export interface RegisterDto {
   email: string;
   password: string;
-  passwordConfirm: string;
+  confirmPassword: string;
   nickname?: string;
 }

@@ -13,9 +13,11 @@ export const apiClient = axios.create({
 // 请求拦截器 - 添加token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = sessionStorage.getItem('accessToken');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('accessToken');
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -28,8 +30,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Token过期，清除登录状态
+    // 登录接口的 401 不跳转，由页面自行处理错误提示
+    const url = error.config?.url ?? '';
+    if (typeof window !== 'undefined' && error.response?.status === 401 && !url.includes('/auth/login')) {
       sessionStorage.removeItem('accessToken');
       sessionStorage.removeItem('user');
       window.location.href = '/login';

@@ -7,6 +7,7 @@ import { ConfigService } from './config.service';
 export class MinioService implements OnModuleInit {
   private minioClient: MinIO.Client;
   private bucketName: string;
+  private isConnected: boolean = false; // 连接状态标记
 
   constructor(private configService: ConfigService) {
     const minioConfig = this.configService.minio;
@@ -22,11 +23,19 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // 确保bucket存在
-    const exists = await this.minioClient.bucketExists(this.bucketName);
-    if (!exists) {
-      await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
-      console.log(`✅ MinIO bucket "${this.bucketName}" 创建成功`);
+    try {
+      // 确保bucket存在
+      const exists = await this.minioClient.bucketExists(this.bucketName);
+      if (!exists) {
+        await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
+        console.log(`✅ MinIO bucket "${this.bucketName}" 创建成功`);
+      }
+      this.isConnected = true;
+      console.log('✅ MinIO 连接成功');
+    } catch (error) {
+      this.isConnected = false;
+      console.warn('⚠️  MinIO 连接失败，文件上传功能将不可用');
+      console.warn('   请启动 MinIO 服务或检查配置：', error.message);
     }
   }
 
@@ -36,6 +45,10 @@ export class MinioService implements OnModuleInit {
     file: Express.Multer.File,
     folder: 'original' | 'generated' | 'avatars' = 'original',
   ): Promise<{ url: string; objectName: string }> {
+    if (!this.isConnected) {
+      throw new Error('MinIO 服务不可用，无法上传文件');
+    }
+
     const ext = file.originalname.split('.').pop() || 'bin';
     const objectName = `${userId}/${folder}/${uuidv4()}.${ext}`;
 

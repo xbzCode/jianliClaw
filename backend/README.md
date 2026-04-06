@@ -31,6 +31,83 @@
 $ npm install
 ```
 
+## Database Setup
+
+### 方案一：使用现有 PostgreSQL 创建数据库和用户
+
+#### 步骤1：连接到 PostgreSQL
+
+根据你的 PostgreSQL 安装方式，使用以下方法之一连接：
+
+**使用 psql 命令行工具：**
+```bash
+# 使用 psql 连接（在 PostgreSQL 安装目录的 bin 文件夹中）
+psql -U postgres
+```
+
+**或使用图形工具（如 pgAdmin、DBeaver）：**
+- 以 postgres 超级用户身份连接到 PostgreSQL
+
+#### 步骤2：创建数据库和用户
+
+连接成功后，执行以下 SQL 命令：
+
+```sql
+-- 创建用户（密码使用你想要的密码）
+CREATE USER jianliclaw WITH PASSWORD 'jianliclaw123';
+
+-- 创建数据库
+CREATE DATABASE jianliclaw OWNER jianliclaw;
+
+-- 授予权限
+GRANT ALL PRIVILEGES ON DATABASE jianliclaw TO jianliclaw;
+
+-- 连接到 jianliclaw 数据库
+\c jianliclaw
+
+-- 授予 schema 权限
+GRANT ALL ON SCHEMA public TO jianliclaw;
+
+-- 启用 pgvector 扩展（如果需要）
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+**或直接执行初始化脚本：**
+```bash
+psql -U postgres -f ../docker/setup-database.sql
+```
+
+#### 步骤3：配置环境变量
+
+确保 `.env` 文件中的数据库配置正确：
+
+```env
+DATABASE_URL="postgresql://jianliclaw:jianliclaw123@localhost:5432/jianliclaw?schema=public"
+```
+
+#### 步骤4：运行 Prisma 迁移创建表
+
+```bash
+# 生成 Prisma 客户端
+$ npx prisma generate
+
+# 推送 schema 到数据库（创建表）
+$ npx prisma db push
+
+# 或使用迁移（生产环境推荐）
+$ npx prisma migrate dev --name init
+```
+
+### 数据库连接验证
+
+执行以下命令验证数据库连接：
+
+```bash
+$ npx prisma db pull
+```
+
+如果成功，说明数据库连接正常。
+
 ## Compile and run the project
 
 ```bash

@@ -7,8 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api/auth';
@@ -61,6 +59,8 @@ export default function RegisterPage() {
     }
   };
 
+  const inputClass = "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent pl-9 pr-2.5 py-1 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
@@ -70,7 +70,7 @@ export default function RegisterPage() {
             创建账户，开启智能简历优化之旅
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm p-3 rounded-md">
@@ -81,11 +81,11 @@ export default function RegisterPage() {
               <Label htmlFor="email">邮箱</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
+                <input
                   id="email"
                   type="email"
                   placeholder="请输入邮箱"
-                  className="pl-9"
+                  className={inputClass}
                   {...register('email')}
                 />
               </div>
@@ -97,11 +97,11 @@ export default function RegisterPage() {
               <Label htmlFor="nickname">昵称（可选）</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
+                <input
                   id="nickname"
                   type="text"
                   placeholder="请输入昵称"
-                  className="pl-9"
+                  className={inputClass}
                   {...register('nickname')}
                 />
               </div>
@@ -113,11 +113,11 @@ export default function RegisterPage() {
               <Label htmlFor="password">密码</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
+                <input
                   id="password"
                   type="password"
                   placeholder="请输入密码（6-20位）"
-                  className="pl-9"
+                  className={inputClass}
                   {...register('password')}
                 />
               </div>
@@ -129,11 +129,11 @@ export default function RegisterPage() {
               <Label htmlFor="passwordConfirm">确认密码</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
+                <input
                   id="passwordConfirm"
                   type="password"
                   placeholder="请再次输入密码"
-                  className="pl-9"
+                  className={inputClass}
                   {...register('passwordConfirm')}
                 />
               </div>
@@ -143,10 +143,14 @@ export default function RegisterPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center w-full h-8 gap-1.5 px-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/80 disabled:pointer-events-none disabled:opacity-50 transition-all"
+              disabled={isLoading}
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               注册
-            </Button>
+            </button>
             <div className="text-sm text-center text-gray-500">
               已有账户？{' '}
               <Link href="/login" className="text-blue-600 hover:underline">
